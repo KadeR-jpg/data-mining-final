@@ -1,10 +1,13 @@
 {
     "python.pythonPath": "C:\\Users\\KadeC\\AppData\\Local\\Programs\\Python\\Python39\\python.exe",
     "cSpell.words": [
+        "cond",
         "danceability",
+        "darkmode",
         "energyand",
         "instrumentalness",
         "itertuples",
+        "sklearn's",
         "speechiness"
     ]
 }

@@ -1,8 +1,9 @@
-# %%
+#%%
 import numpy as np
 from numpy.core.numeric import NaN
 import pandas as pd
 from sklearn.neighbors import KNeighborsClassifier
+from matplotlib.colors import ListedColormap
 from scipy.spatial.distance import euclidean, minkowski
 from scipy.stats import mode
 from sklearn.preprocessing import MinMaxScaler
@@ -13,12 +14,9 @@ import matplotlib.pyplot as plt
 class KNN:
 
     def mink_dist(self, x, y):
-        dist_measure = 1
-        dimensions = len(x)
         dist = 0
-        for dimension in range(dimensions):
+        for dimension in range(x):
             dist += np.abs(x[dimension] - y[dimension])**1
-        dist = dist ** (1/dist_measure)
         return dist
 
     def predict(self, X_train, X_test, y, a):
@@ -39,11 +37,12 @@ class KNN:
 data = pd.read_csv(
     r'testData.csv')
 df = pd.DataFrame(data)
-df['artists'] = df['artists'].apply(lambda x: x.strip("[\"]").replace("'", "").split(',')[0])
+df['artists'] = df['artists'].apply(
+    lambda x: x.strip("[\"]").replace("'", "").split(',')[0])
 df = df.drop(columns=['artists', 'name']).round(decimals=4)
 correlation = df.corr(method='pearson').abs()
-flatten = correlation.unstack().sort_values(ascending=False ,kind='quicksort').dropna()
-print(flatten.to_string())
+flatten = correlation.unstack().sort_values(
+    ascending=False, kind='quicksort').dropna()
 
 
 # We do not want the year to influence the data
@@ -55,26 +54,19 @@ df['month_release'] = df['release_date'].apply(lambda x: x.month)
 df['day_release'] = df['release_date'].apply(lambda x: x.day)
 df['weekday_release'] = df['release_date'].apply(lambda x: x.weekday())
 df = df.drop(columns=['release_date'])
-df2 = df[['energy', 'valence']]
 days = [x for x in df['day_release']]
-# plt.figure()
-# df2.plot.hist(stacked=True, alpha=0.5, bins=20)
-# labels, counts = np.unique(days, return_counts=True)
-# plt.bar(labels, counts,  align='center')
-# plt.show()
 # We need to assumed popularity so we drop the popularity to test the data
-# scale = MinMaxScaler(feature_range=(-1, 1))
-# X_train = df.sample(n=500).drop(columns='popularity').to_numpy()
-# X_test = df.sample(n=500).drop(columns='popularity').to_numpy()
-# y_train = df['popularity'].sample(n=500).to_numpy()
-# y_test = df['popularity'].sample(n=500).to_numpy()
-# X_train_scaled = scale.fit_transform(X_train)
-# X_test_scaled = scale.fit_transform(X_test)
-# knn = KNN()
-# prediction = knn.predict(X_train=X_train, X_test=X_test, y=y_train, a=12)
-# print(accuracy_score(y_test, prediction))
-# model = KNeighborsClassifier(n_neighbors=5)
-# model.fit(X_train, y_train)
-# predict = model.predict(X_test)
-# print(accuracy_score(y_test, predict))
-# %%
+scale = MinMaxScaler(feature_range=(-1, 1))
+X_train = df.sample(n=500).drop(columns='popularity').to_numpy()
+X_test = df.sample(n=500).drop(columns='popularity').to_numpy()
+y_train = df['popularity'].sample(n=500).to_numpy()
+y_test = df['popularity'].sample(n=500).to_numpy()
+X_train_scaled = scale.fit_transform(X_train)
+X_test_scaled = scale.fit_transform(X_test)
+knn = KNN()
+prediction = knn.predict(X_train=X_train, X_test=X_test, y=y_train, a=12)
+print(accuracy_score(y_test, prediction))
+model = KNeighborsClassifier(n_neighbors=5, weights='distance')
+model.fit(X_train, y_train)
+predict = model.predict(X_test)
+print(accuracy_score(y_test, predict))
